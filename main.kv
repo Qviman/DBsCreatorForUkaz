@@ -1,0 +1,69 @@
+ScreenManager:
+    dbs: dbs
+    gen: gen
+    m_page: m_page
+
+    Screen:
+        name: 'main_page' 
+        id: m_page  
+
+        BoxLayout:
+            orientation: 'vertical'
+            padding: dp(56)
+            spacing: dp(24)
+
+            Time_Label:
+                font_name: 'Roboto'
+                text_size: self.width, None
+                size_hint_y: None
+                height: self.texture_size[1]
+                font_size: dp(20)
+                color: 62/255, 62/255, 62/255, 1
+                markup: True
+                text: 'Это текст Это текст Это текст Это текст [font=fonts/triodion_ucs]«Ґллилyіа, Слaва тебЁ показaвшему нaмъ свётъ...»[/font]'
+            
+
+            BoxLayout:
+                Menu_Button:
+                    text: 'From exls to dbs'
+                    on_press:
+                        app.create_dbs()
+                Time_Label:
+                    id: dbs
+                    text: 'no dbs'
+
+            BoxLayout:
+                Menu_Button:
+                    text: 'From dbs to pickls'
+                    on_press:
+                        app.generate_labels()
+                Time_Label:
+                    id: gen
+                    text: 'no pickles'
+
+
+
+<Time_Label@Label>
+    font_name: 'Roboto'
+    bold: True
+    font_size: dp(20) 
+    color: 12/255, 83/255, 115/255, 1
+    size_hint_y: None
+    height: dp(56)
+    background_color: 1, 1, 1, 0
+
+<Menu_Button@Button>
+    font_name: 'Roboto'
+    bold: True
+    font_size: dp(20) 
+    color: 12/255, 83/255, 115/255, 1
+    size_hint_y: None
+    height: dp(56)
+    background_color: 1, 1, 1, 0
+
+    canvas.before:
+        Color:
+            rgba: (12/255, 83/255, 115/255, 1)  # Цвет границы (красный)
+        Line:
+            width: dp(1)
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(16))                 
