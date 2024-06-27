@@ -42,6 +42,8 @@ class DataBase():
         except:
             return None
 
+    def get_dodatok():
+        pass
 
 class Mistakes_and_solutions():
     mistakes1 = ['\xa0', '¬',   '…', ' .', '.. ', '\n ', ' )', ', -', '[У', '\n[/b]', ' ...', '\n \n']
@@ -293,7 +295,7 @@ class Separator():
 
         return labels
 
-    def cut_label_into_paragraphs(text, status):
+    def cut_label_into_paragraphs(text):
         input_text = text
         while input_text.count('\n \n'):
             input_text = input_text.replace('\n \n', '\n\n')
@@ -424,13 +426,8 @@ class DBRangeHandler():
         # Cut labels and add them with descr to output
         for k in range(start+2, end, 2):
             if current_db[k] != None:
-
-                if int(current_db[0][:-2]) == 18 and int(current_db[1][:-2]) == 3 and k < 10:
-                    #print([current_db[k]], '\n')
-                    status = True
-                else: status = False
                   
-                new_labels = Separator.cut_label_into_paragraphs(current_db[k], status)
+                new_labels = Separator.cut_label_into_paragraphs(current_db[k])
                 labels_text += new_labels
 
             if current_db[k+1] != None: 
@@ -454,8 +451,8 @@ class Navigator():
         return [night, great_night, great_afternight, morning, imagening, lpd, hours, liturg]
         
 
-    def find_points(d,m, labels):
-        all_bs = Navigator.get_all_bs()
+    def find_points(d,m, labels, titles):
+        all_bs = titles #Navigator.get_all_bs()
         
         # Create list [[bs, bs_label_position], ...]
         total = []
@@ -478,6 +475,64 @@ class Navigator():
 #print(len(all_rows_from_sheet))
 
 class main(App):
+    def create_dodatok_pickles(self):
+        wb = openpyxl.load_workbook('dodatok.xlsx')
+        sheet = wb.active
+        all_rows_from_sheet = tuple(sheet.rows) # generator -> tuple
+
+        dodatok_text = []
+        dodatok_desc = []
+        dodatok_navigation_titles = []
+
+        total_descs = 0
+
+        for it in range(1, len(all_rows_from_sheet)):
+            if all_rows_from_sheet[it][0].value == None:
+                pass
+            else:
+                dodatok_text.append(all_rows_from_sheet[it][0].value)
+                for k in range(1, len(all_rows_from_sheet[it])):
+                    if all_rows_from_sheet[it][k].value == None:
+                        pass
+                    elif k%2 == 1:
+                        total_descs += all_rows_from_sheet[it][k].value.count('[/ref]')
+                        new_labels = Separator.cut_label_into_paragraphs(all_rows_from_sheet[it][k].value)
+                        dodatok_text += new_labels
+                    else: 
+                        #new_desc = Separator.cut_label_into_paragraphs(all_rows_from_sheet[it][k].value)
+                        #dodatok_desc.append(new_desc)
+
+                        dodatok_desc.append(all_rows_from_sheet[it][k].value)
+
+                dodatok_navigation_titles.append(all_rows_from_sheet[it][0].value) #dodatok_text.index(all_rows_from_sheet[it][0].value)
+            #title = '[b]' + dodatok_text[dodatok_text.index(all_rows_from_sheet[it][0].value)] + '[/b]'
+
+        dodatok_text = Debugger().solve_all(dodatok_text)
+        dodatok_desc = Debugger().solve_all(dodatok_desc)
+        dodatok_navigation = Navigator.find_points(d, m, dodatok_text, dodatok_navigation_titles) 
+
+        directory = "db/dodatok/" 
+        text_filename = "text.pickle"
+        desc_filename = "desc.pickle"
+        navig_filename = "navig.pickle"
+        PicklePacker.pack_on_pickle(directory, text_filename, dodatok_text)
+        PicklePacker.pack_on_pickle(directory, desc_filename, dodatok_desc)
+        PicklePacker.pack_on_pickle(directory, navig_filename, dodatok_navigation)
+
+        #print(len(dodatok_text[:dodatok_navigation[1][1]+1]))
+        #print(dodatok_text)
+        #print(dodatok_desc)
+        #print(dodatok_navigation)
+
+        print(len(dodatok_desc), total_descs)
+
+        '''for it in dodatok_navigation:
+            print(dodatok_text[it[1]])'''
+
+
+
+
+
     def create_dbs(self):
         wb = openpyxl.load_workbook('calendar.xlsx')
         sheet = wb.active
@@ -538,7 +593,7 @@ class main(App):
                     labels = Debugger().solve_all(labels)
                     desc = Debugger().solve_all(desc)
 
-                    navig = Navigator.find_points(d, m, labels)  
+                    navig = Navigator.find_points(d, m, labels, titles = Navigator.get_all_bs())  
 
 
                     directory = "db/"+str(m)+'/'+str(d)+'/' 
