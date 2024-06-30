@@ -452,7 +452,7 @@ class Navigator():
         
 
     def find_points(d,m, labels, titles):
-        all_bs = titles #Navigator.get_all_bs()
+        all_bs = Navigator.get_all_bs()
         
         # Create list [[bs, bs_label_position], ...]
         total = []
@@ -480,7 +480,9 @@ class main(App):
         sheet = wb.active
         all_rows_from_sheet = tuple(sheet.rows) # generator -> tuple
 
+        dodatok_text_title = []
         dodatok_text = []
+        dodatok_desc_title = []
         dodatok_desc = []
         dodatok_navigation_titles = []
 
@@ -490,26 +492,38 @@ class main(App):
             if all_rows_from_sheet[it][0].value == None:
                 pass
             else:
-                dodatok_text.append(all_rows_from_sheet[it][0].value)
+                dodatok_text_title.append(all_rows_from_sheet[it][0].value)
                 for k in range(1, len(all_rows_from_sheet[it])):
                     if all_rows_from_sheet[it][k].value == None:
                         pass
                     elif k%2 == 1:
                         total_descs += all_rows_from_sheet[it][k].value.count('[/ref]')
                         new_labels = Separator.cut_label_into_paragraphs(all_rows_from_sheet[it][k].value)
-                        dodatok_text += new_labels
+                        dodatok_text_title += new_labels
                     else: 
                         #new_desc = Separator.cut_label_into_paragraphs(all_rows_from_sheet[it][k].value)
                         #dodatok_desc.append(new_desc)
 
-                        dodatok_desc.append(all_rows_from_sheet[it][k].value)
+                        dodatok_desc_title.append(all_rows_from_sheet[it][k].value)
 
-                dodatok_navigation_titles.append(all_rows_from_sheet[it][0].value) #dodatok_text.index(all_rows_from_sheet[it][0].value)
+                #print(dodatok_text_title)
+                dodatok_text_title = Debugger().solve_all(dodatok_text_title)
+                dodatok_desc_title = Debugger().solve_all(dodatok_desc_title)
+                #print(dodatok_text_title)
+
+                dodatok_text.append(dodatok_text_title)
+                dodatok_desc.append(dodatok_desc_title)
+                #print(type(dodatok_text))
+
+                dodatok_text_title = []
+                dodatok_desc_title = []
+
+                dodatok_navigation_titles.append(all_rows_from_sheet[it][0].value.replace('\n', '')) #dodatok_text.index(all_rows_from_sheet[it][0].value)
             #title = '[b]' + dodatok_text[dodatok_text.index(all_rows_from_sheet[it][0].value)] + '[/b]'
 
-        dodatok_text = Debugger().solve_all(dodatok_text)
-        dodatok_desc = Debugger().solve_all(dodatok_desc)
-        dodatok_navigation = Navigator.find_points(d, m, dodatok_text, dodatok_navigation_titles) 
+        #dodatok_text = Debugger().solve_all(dodatok_text)
+        #dodatok_desc = Debugger().solve_all(dodatok_desc)
+        dodatok_navigation =  dodatok_navigation_titles
 
         directory = "db/dodatok/" 
         text_filename = "text.pickle"
@@ -520,14 +534,15 @@ class main(App):
         PicklePacker.pack_on_pickle(directory, navig_filename, dodatok_navigation)
 
         #print(len(dodatok_text[:dodatok_navigation[1][1]+1]))
-        #print(dodatok_text)
-        #print(dodatok_desc)
+        print(dodatok_text)
+        #print(dodatok_desc[0])
         #print(dodatok_navigation)
 
-        print(len(dodatok_desc), total_descs)
+        #print(len(dodatok_desc), total_descs)
 
-        '''for it in dodatok_navigation:
-            print(dodatok_text[it[1]])'''
+        #for it in dodatok_navigation:
+            #print([dodatok_text[it[1]]])
+            #print([[it[0]]])
 
 
 
